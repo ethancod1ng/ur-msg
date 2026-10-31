@@ -1,9 +1,6 @@
 name: Monitor Tokyo UR vacancies
 
 on:
-  schedule:
-    # Offset from common five-minute boundaries to reduce scheduler congestion.
-    - cron: "2/5 * * * *"
   workflow_dispatch:
     inputs:
       notify_initial:
