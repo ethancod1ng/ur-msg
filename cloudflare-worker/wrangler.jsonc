@@ -1,0 +1,18 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "ur-msg-scheduler",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-31",
+  "observability": {
+    "enabled": true
+  },
+  "triggers": {
+    "crons": ["*/5 * * * *"]
+  },
+  "vars": {
+    "GITHUB_OWNER": "ethancod1ng",
+    "GITHUB_REPO": "ur-msg",
+    "GITHUB_WORKFLOW": "monitor.yml",
+    "GITHUB_REF": "main"
+  }
+}
