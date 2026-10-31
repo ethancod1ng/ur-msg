@@ -28,6 +28,7 @@ SITE_BASE = "https://www.ur-net.go.jp"
 REFERER = f"{SITE_BASE}/chintai/kanto/tokyo/list/"
 TOKYO_AREA_IDS = ("01", "02", "03", "04", "05", "06")
 USER_AGENT = "ur-tokyo-telegram-monitor/1.0"
+DEFAULT_MAX_RENT_YEN = 100_000
 
 
 @dataclass(frozen=True)
@@ -60,7 +61,7 @@ class Filters:
         return cls(
             cities=_csv_env("UR_CITIES"),
             layouts=_csv_env("UR_LAYOUTS"),
-            max_rent_yen=int(max_rent) if max_rent else None,
+            max_rent_yen=int(max_rent) if max_rent else DEFAULT_MAX_RENT_YEN,
         )
 
 

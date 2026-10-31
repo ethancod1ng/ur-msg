@@ -58,6 +58,16 @@ class MonitorTests(unittest.TestCase):
         self.assertFalse(ur_monitor.matches(vacancy, ur_monitor.Filters(cities=frozenset({"新宿区"}))))
         self.assertFalse(ur_monitor.matches(vacancy, ur_monitor.Filters(layouts=frozenset({"1LDK"}))))
 
+    def test_default_filter_caps_rent_at_100000_yen(self):
+        with patch.dict(os.environ, {}, clear=True):
+            filters = ur_monitor.Filters.from_env()
+        self.assertEqual(100000, filters.max_rent_yen)
+
+    def test_environment_can_override_default_rent_cap(self):
+        with patch.dict(os.environ, {"UR_MAX_RENT_YEN": "85000"}, clear=True):
+            filters = ur_monitor.Filters.from_env()
+        self.assertEqual(85000, filters.max_rent_yen)
+
     def test_missing_state_creates_baseline_without_additions(self):
         vacancy = ur_monitor.normalize_vacancy(BUILDING, ROOM)
         self.assertEqual([], ur_monitor.new_vacancies(None, [vacancy]))

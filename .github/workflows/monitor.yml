@@ -41,7 +41,7 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           UR_CITIES: ${{ vars.UR_CITIES }}
           UR_LAYOUTS: ${{ vars.UR_LAYOUTS }}
-          UR_MAX_RENT_YEN: ${{ vars.UR_MAX_RENT_YEN }}
+          UR_MAX_RENT_YEN: ${{ vars.UR_MAX_RENT_YEN || '100000' }}
         run: |
           extra=""
           if [ "${{ inputs.notify_initial }}" = "true" ]; then extra="--notify-initial"; fi
