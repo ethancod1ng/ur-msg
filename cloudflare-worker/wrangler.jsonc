@@ -2,9 +2,14 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "ur-msg-scheduler",
   "main": "src/index.js",
-  "compatibility_date": "2026-10-31",
+  "compatibility_date": "2026-10-30",
   "observability": {
     "enabled": true
+  },
+  "assets": {
+    "directory": "./public",
+    "binding": "ASSETS",
+    "run_worker_first": ["/api/*", "/health"]
   },
   "triggers": {
     "crons": ["*/5 * * * *", "30 23 * * *"]

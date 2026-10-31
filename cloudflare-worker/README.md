@@ -1,9 +1,11 @@
-# Cloudflare scheduler
+# Cloudflare scheduler and vacancy dashboard
 
 This Worker triggers the existing GitHub Actions on two schedules:
 
 - `monitor.yml` every five minutes.
 - `daily-digest.yml` every day at 08:30 Japan time (`23:30` UTC).
+
+It also serves a public, responsive vacancy dashboard from Workers Static Assets. The dashboard reads the latest committed `data/state.json` through `/api/vacancies`, refreshes every five minutes, and does not expose any GitHub or Telegram secrets. `/health` remains available for health checks.
 
 ## One-time setup
 
@@ -30,6 +32,8 @@ This Worker triggers the existing GitHub Actions on two schedules:
 ## Verification
 
 Watch Worker logs with `npx wrangler tail`, then confirm a new run appears in GitHub Actions after the next five-minute boundary. GitHub labels these externally triggered runs as `workflow_dispatch`.
+
+Open the deployed Worker URL to view the dashboard. Check `/api/vacancies` for the normalized JSON feed and `/health` for the scheduler health response.
 
 After the external schedule is verified, remove the `schedule` block from `.github/workflows/monitor.yml` to prevent duplicate runs.
 

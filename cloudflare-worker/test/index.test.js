@@ -71,11 +71,83 @@ test("routes each cron schedule to the intended workflow", () => {
 });
 
 test("returns a healthy HTTP response", async () => {
-  const response = await worker.fetch();
+  const response = await worker.fetch(new Request("https://example.com/health"));
 
   assert.equal(response.status, 200);
   assert.equal(await response.text(), "ur-msg scheduler is healthy\n");
   assert.equal(response.headers.get("content-type"), "text/plain; charset=utf-8");
+});
+
+test("returns normalized vacancies from the public snapshot", async () => {
+  const snapshot = {
+    version: 1,
+    vacancies: [{ key: "20_2250:room", building: "高島平", rent_yen: 96000 }],
+  };
+  const fakeFetch = async () =>
+    Response.json(snapshot, {
+      headers: { ETag: '"snapshot-etag"' },
+    });
+
+  const response = await worker.fetch(
+    new Request("https://example.com/api/vacancies"),
+    {},
+    { waitUntil() {} },
+    fakeFetch,
+  );
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.version, 1);
+  assert.equal(payload.count, 1);
+  assert.deepEqual(payload.vacancies, snapshot.vacancies);
+  assert.equal(response.headers.get("cache-control"), "public, max-age=60, s-maxage=300");
+});
+
+test("reports snapshot fetch failures without caching them", async () => {
+  const fakeFetch = async () => new Response("missing", { status: 404 });
+
+  const response = await worker.fetch(
+    new Request("https://example.com/api/vacancies"),
+    {},
+    { waitUntil() {} },
+    fakeFetch,
+  );
+
+  assert.equal(response.status, 502);
+  assert.match((await response.json()).error, /snapshot/i);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("rejects malformed vacancy snapshots", async () => {
+  const fakeFetch = async () => Response.json({ version: 1, vacancies: null });
+
+  const response = await worker.fetch(
+    new Request("https://example.com/api/vacancies"),
+    {},
+    { waitUntil() {} },
+    fakeFetch,
+  );
+
+  assert.equal(response.status, 502);
+  assert.match((await response.json()).error, /invalid/i);
+});
+
+test("forwards dashboard requests to static assets", async () => {
+  let forwardedUrl;
+  const assets = {
+    async fetch(request) {
+      forwardedUrl = request.url;
+      return new Response("dashboard", { headers: { "Content-Type": "text/html" } });
+    },
+  };
+
+  const response = await worker.fetch(
+    new Request("https://example.com/"),
+    { ASSETS: assets },
+  );
+
+  assert.equal(await response.text(), "dashboard");
+  assert.equal(forwardedUrl, "https://example.com/");
 });
 
 test("rejects a missing GitHub token before making a request", async () => {

@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="东京 UR 空房实时监视，筛选月租与茅场町通勤时间。">
+    <title>UR 空房监视</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script type="module" src="/app.js"></script>
+  </head>
+  <body>
+    <div class="ambient ambient-one"></div>
+    <div class="ambient ambient-two"></div>
+    <header class="hero">
+      <nav class="nav" aria-label="主导航">
+        <a class="brand" href="/" aria-label="UR 空房监视首页">
+          <span class="brand-mark">UR</span>
+          <span>空房监视</span>
+        </a>
+        <span class="live-pill"><span class="live-dot"></span>每 5 分钟检查</span>
+      </nav>
+      <div class="hero-copy">
+        <p class="eyebrow">TOKYO VACANCY WATCH</p>
+        <h1>找到适合你的<br><span>东京 UR 住处</span></h1>
+        <p class="intro">月租不超过 10 万日元，到茅场町预计 60 分钟以内。数据由自动任务持续更新。</p>
+      </div>
+      <div class="summary" aria-live="polite">
+        <div><strong id="total-count">—</strong><span>当前空房</span></div>
+        <div><strong id="city-count">—</strong><span>覆盖区域</span></div>
+        <div><strong id="lowest-rent">—</strong><span>最低月租</span></div>
+      </div>
+    </header>
+
+    <main>
+      <section class="toolbar" aria-label="筛选房源">
+        <label class="search-field">
+          <span class="sr-only">搜索区域或房源名称</span>
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="m21 21-4.35-4.35m2.35-5.15a7.5 7.5 0 1 1-15 0 7.5 7.5 0 0 1 15 0Z"/></svg>
+          <input id="search" type="search" placeholder="搜索区域、房源或车站">
+        </label>
+        <label>
+          <span class="sr-only">户型</span>
+          <select id="layout-filter"><option value="">全部户型</option></select>
+        </label>
+        <label>
+          <span class="sr-only">排序方式</span>
+          <select id="sort-order">
+            <option value="rent">租金从低到高</option>
+            <option value="commute">通勤从短到长</option>
+            <option value="area">面积从大到小</option>
+          </select>
+        </label>
+        <button id="refresh" class="refresh" type="button" aria-label="立即刷新">
+          <svg aria-hidden="true" viewBox="0 0 24 24"><path d="M20 6v5h-5M4 18v-5h5m9.5-3a7 7 0 0 0-12-2.5L4 10m16 4-2.5 2.5A7 7 0 0 1 5.5 14"/></svg>
+          刷新
+        </button>
+      </section>
+
+      <div class="results-heading">
+        <div><h2>当前可申请房源</h2><p id="result-label">正在读取最新数据…</p></div>
+        <p id="sync-time" class="sync-time"></p>
+      </div>
+
+      <section id="status" class="status-card" aria-live="polite">
+        <div class="spinner"></div>
+        <p>正在同步 UR 空房数据…</p>
+      </section>
+      <section id="vacancy-list" class="vacancy-grid" aria-label="UR 空房列表"></section>
+    </main>
+
+    <footer>
+      <p>房源状态可能随时变化，最终信息请以 UR 官方页面为准。</p>
+      <a href="https://www.ur-net.go.jp/chintai/" target="_blank" rel="noopener noreferrer">访问 UR 官方网站 ↗</a>
+    </footer>
+  </body>
+</html>
