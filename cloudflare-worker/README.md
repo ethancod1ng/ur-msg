@@ -1,6 +1,9 @@
 # Cloudflare scheduler
 
-This Worker triggers the existing `monitor.yml` GitHub Action every five minutes.
+This Worker triggers the existing GitHub Actions on two schedules:
+
+- `monitor.yml` every five minutes.
+- `daily-digest.yml` every day at 08:30 Japan time (`23:30` UTC).
 
 ## One-time setup
 

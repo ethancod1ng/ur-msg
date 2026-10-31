@@ -1,13 +1,17 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import worker, { dispatchWorkflow } from "../src/index.js";
+import worker, {
+  dispatchWorkflow,
+  workflowForSchedule,
+} from "../src/index.js";
 
 const env = {
   GITHUB_TOKEN: "test-token",
   GITHUB_OWNER: "ethancod1ng",
   GITHUB_REPO: "ur-msg",
   GITHUB_WORKFLOW: "monitor.yml",
+  GITHUB_DAILY_WORKFLOW: "daily-digest.yml",
   GITHUB_REF: "main",
 };
 
@@ -40,6 +44,30 @@ test("accepts GitHub's 200 workflow dispatch response", async () => {
     );
 
   await dispatchWorkflow(env, fakeFetch);
+});
+
+test("dispatches the daily digest workflow when selected", async () => {
+  let requestUrl;
+  const fakeFetch = async (url) => {
+    requestUrl = url;
+    return new Response(null, { status: 204 });
+  };
+
+  await dispatchWorkflow(env, fakeFetch, env.GITHUB_DAILY_WORKFLOW);
+
+  assert.equal(
+    requestUrl,
+    "https://api.github.com/repos/ethancod1ng/ur-msg/actions/workflows/daily-digest.yml/dispatches",
+  );
+});
+
+test("routes each cron schedule to the intended workflow", () => {
+  assert.equal(workflowForSchedule("*/5 * * * *", env), "monitor.yml");
+  assert.equal(workflowForSchedule("30 23 * * *", env), "daily-digest.yml");
+  assert.throws(
+    () => workflowForSchedule("0 0 * * *", env),
+    /No workflow configured for schedule/,
+  );
 });
 
 test("returns a healthy HTTP response", async () => {

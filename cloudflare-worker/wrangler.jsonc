@@ -7,12 +7,13 @@
     "enabled": true
   },
   "triggers": {
-    "crons": ["*/5 * * * *"]
+    "crons": ["*/5 * * * *", "30 23 * * *"]
   },
   "vars": {
     "GITHUB_OWNER": "ethancod1ng",
     "GITHUB_REPO": "ur-msg",
     "GITHUB_WORKFLOW": "monitor.yml",
+    "GITHUB_DAILY_WORKFLOW": "daily-digest.yml",
     "GITHUB_REF": "main"
   }
 }

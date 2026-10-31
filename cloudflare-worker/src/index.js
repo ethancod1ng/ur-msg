@@ -2,21 +2,41 @@ const requiredKeys = [
   "GITHUB_TOKEN",
   "GITHUB_OWNER",
   "GITHUB_REPO",
-  "GITHUB_WORKFLOW",
   "GITHUB_REF",
 ];
 
-export async function dispatchWorkflow(env, fetchImpl = fetch) {
+export function workflowForSchedule(cron, env) {
+  const workflows = {
+    "*/5 * * * *": env.GITHUB_WORKFLOW,
+    "30 23 * * *": env.GITHUB_DAILY_WORKFLOW,
+  };
+  const workflow = workflows[cron];
+
+  if (!workflow) {
+    throw new Error(`No workflow configured for schedule: ${cron}`);
+  }
+
+  return workflow;
+}
+
+export async function dispatchWorkflow(
+  env,
+  fetchImpl = fetch,
+  workflow = env.GITHUB_WORKFLOW,
+) {
   for (const key of requiredKeys) {
     if (!env[key]) {
       throw new Error(`${key} is not configured`);
     }
   }
+  if (!workflow) {
+    throw new Error("GitHub workflow is not configured");
+  }
 
   const owner = encodeURIComponent(env.GITHUB_OWNER);
   const repo = encodeURIComponent(env.GITHUB_REPO);
-  const workflow = encodeURIComponent(env.GITHUB_WORKFLOW);
-  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${workflow}/dispatches`;
+  const encodedWorkflow = encodeURIComponent(workflow);
+  const url = `https://api.github.com/repos/${owner}/${repo}/actions/workflows/${encodedWorkflow}/dispatches`;
 
   const response = await fetchImpl(url, {
     method: "POST",
@@ -45,7 +65,8 @@ export default {
     });
   },
 
-  async scheduled(_controller, env, ctx) {
-    ctx.waitUntil(dispatchWorkflow(env));
+  async scheduled(controller, env, ctx) {
+    const workflow = workflowForSchedule(controller.cron, env);
+    ctx.waitUntil(dispatchWorkflow(env, fetch, workflow));
   },
 };
