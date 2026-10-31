@@ -127,7 +127,7 @@ class MonitorTests(unittest.TestCase):
         message = ur_monitor.format_vacancy(vacancy)
         self.assertIn("A&amp;B", message)
         self.assertIn("到茅場町约 <b>52 分钟</b>", message)
-        self.assertIn("每月合计约 <b>52,600円</b>（含月租、共益费）", message)
+        self.assertIn("月费约 <b>52,600円</b>（含共益费）", message)
         self.assertNotIn("48,100円", message)
         self.assertNotIn("4,500円", message)
         self.assertIn("3DK｜53㎡｜4楼", message)

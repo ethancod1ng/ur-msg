@@ -344,7 +344,7 @@ def format_vacancy(item: Vacancy) -> str:
     ]
     if monthly_total is not None:
         lines.append(
-            f"💴 每月合计约 <b>{monthly_total:,}円</b>（含月租、共益费）"
+            f"💴 月费约 <b>{monthly_total:,}円</b>（含共益费）"
         )
     else:
         lines.append("💴 每月费用：请查看 UR 详情")
