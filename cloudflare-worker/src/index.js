@@ -30,7 +30,7 @@ export async function dispatchWorkflow(env, fetchImpl = fetch) {
     body: JSON.stringify({ ref: env.GITHUB_REF }),
   });
 
-  if (response.status !== 204) {
+  if (response.status !== 200 && response.status !== 204) {
     const details = (await response.text()).slice(0, 500);
     throw new Error(
       `GitHub workflow dispatch failed (${response.status}): ${details}`,
@@ -39,6 +39,12 @@ export async function dispatchWorkflow(env, fetchImpl = fetch) {
 }
 
 export default {
+  async fetch() {
+    return new Response("ur-msg scheduler is healthy\n", {
+      headers: { "Content-Type": "text/plain; charset=utf-8" },
+    });
+  },
+
   async scheduled(_controller, env, ctx) {
     ctx.waitUntil(dispatchWorkflow(env));
   },

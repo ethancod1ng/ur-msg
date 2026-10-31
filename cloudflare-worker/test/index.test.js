@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 
-import { dispatchWorkflow } from "../src/index.js";
+import worker, { dispatchWorkflow } from "../src/index.js";
 
 const env = {
   GITHUB_TOKEN: "test-token",
@@ -27,6 +27,27 @@ test("dispatches the monitor workflow on main", async () => {
   assert.equal(request.options.method, "POST");
   assert.equal(request.options.headers.Authorization, "Bearer test-token");
   assert.deepEqual(JSON.parse(request.options.body), { ref: "main" });
+});
+
+test("accepts GitHub's 200 workflow dispatch response", async () => {
+  const fakeFetch = async () =>
+    Response.json(
+      {
+        workflow_run_id: 123,
+        run_url: "https://api.github.com/repos/ethancod1ng/ur-msg/actions/runs/123",
+      },
+      { status: 200 },
+    );
+
+  await dispatchWorkflow(env, fakeFetch);
+});
+
+test("returns a healthy HTTP response", async () => {
+  const response = await worker.fetch();
+
+  assert.equal(response.status, 200);
+  assert.equal(await response.text(), "ur-msg scheduler is healthy\n");
+  assert.equal(response.headers.get("content-type"), "text/plain; charset=utf-8");
 });
 
 test("rejects a missing GitHub token before making a request", async () => {
