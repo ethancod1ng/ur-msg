@@ -334,8 +334,6 @@ def new_vacancies(previous: dict[str, dict[str, Any]] | None, current: list[Vaca
 def format_vacancy(item: Vacancy) -> str:
     floor = item.floor.replace("階", "楼")
     details = "｜".join(value for value in (item.layout, item.floor_space, floor) if value)
-    common_fee = re.sub(r"^(?:共益費|共益费)\s*[：:]?\s*", "", item.common_fee)
-    common_fee = common_fee.strip("（）() ")
     try:
         monthly_total = item.rent_yen + parse_yen(item.common_fee)
     except ValueError:
@@ -346,13 +344,10 @@ def format_vacancy(item: Vacancy) -> str:
     ]
     if monthly_total is not None:
         lines.append(
-            f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}"
-            f"｜合计约 <b>{monthly_total:,}円</b>"
+            f"💴 每月合计约 <b>{monthly_total:,}円</b>（含月租、共益费）"
         )
     else:
-        lines.append(
-            f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}"
-        )
+        lines.append("💴 每月费用：请查看 UR 详情")
     if item.commute_minutes is not None:
         lines.append(
             f"🚆 到茅場町约 <b>{item.commute_minutes} 分钟</b>｜"
