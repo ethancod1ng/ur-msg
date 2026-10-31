@@ -127,11 +127,11 @@ class MonitorTests(unittest.TestCase):
         message = ur_monitor.format_vacancy(vacancy)
         self.assertIn("A&amp;B", message)
         self.assertIn("到茅場町约 <b>52 分钟</b>", message)
-        self.assertIn("每月合计约 <b>52,600円</b>", message)
-        self.assertIn("共益费 4,500円", message)
+        self.assertIn("共益费 4,500円｜合计约 <b>52,600円</b>", message)
         self.assertIn("3DK｜53㎡｜4楼", message)
         self.assertIn("查看 UR 详情", message)
         self.assertNotIn("JR中央線", message)
+        self.assertNotIn("10万以内", message)
 
     def test_fetches_only_buildings_with_rooms(self):
         def fake_fetch(endpoint, fields):

@@ -343,10 +343,16 @@ def format_vacancy(item: Vacancy) -> str:
     lines = [
         f"🏠 <b>{html.escape(item.building)}</b>｜{html.escape(item.city)}",
         f"🚪 {html.escape(item.room)}",
-        f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}",
     ]
     if monthly_total is not None:
-        lines.append(f"💰 每月合计约 <b>{monthly_total:,}円</b>")
+        lines.append(
+            f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}"
+            f"｜合计约 <b>{monthly_total:,}円</b>"
+        )
+    else:
+        lines.append(
+            f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}"
+        )
     if item.commute_minutes is not None:
         lines.append(
             f"🚆 到茅場町约 <b>{item.commute_minutes} 分钟</b>｜"
@@ -359,7 +365,6 @@ def format_vacancy(item: Vacancy) -> str:
     lines.extend(
         [
             f"📐 {html.escape(details)}",
-            "✨ 10万以内 · 保守估算通勤1小时内",
             f'<a href="{html.escape(item.url, quote=True)}">查看 UR 详情</a>',
         ]
     )
