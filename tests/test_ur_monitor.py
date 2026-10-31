@@ -135,6 +135,36 @@ class MonitorTests(unittest.TestCase):
         self.assertNotIn("JR中央線", message)
         self.assertNotIn("10万以内", message)
 
+    def test_digest_heading_and_empty_message(self):
+        commute = ur_monitor.CommuteEstimate("高尾", 52, 42, 10, 1)
+        vacancy = ur_monitor.normalize_vacancy(BUILDING, ROOM, commute)
+        self.assertIn(
+            "今日符合条件空室｜1 间", ur_monitor.digest_chunks([vacancy])[0]
+        )
+        self.assertIn("当前暂无符合条件的空室", ur_monitor.digest_chunks([])[0])
+
+    @patch("ur_monitor.save_state")
+    @patch("ur_monitor.load_state")
+    @patch("ur_monitor.send_telegram")
+    @patch("ur_monitor.fetch_vacancies")
+    def test_digest_sends_without_touching_incremental_state(
+        self, fetch_vacancies, send_telegram, load_state, save_state
+    ):
+        commute = ur_monitor.CommuteEstimate("高尾", 52, 42, 10, 1)
+        fetch_vacancies.return_value = [
+            ur_monitor.normalize_vacancy(BUILDING, ROOM, commute)
+        ]
+        with patch.dict(
+            os.environ,
+            {"TELEGRAM_BOT_TOKEN": "token", "TELEGRAM_CHAT_ID": "chat"},
+            clear=True,
+        ):
+            result = ur_monitor.run(Path("unused.json"), digest=True)
+        self.assertEqual(0, result)
+        send_telegram.assert_called_once()
+        load_state.assert_not_called()
+        save_state.assert_not_called()
+
     def test_fetches_only_buildings_with_rooms(self):
         def fake_fetch(endpoint, fields):
             if endpoint == "bukken/search/list_bukken/":

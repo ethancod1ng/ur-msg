@@ -1,0 +1,38 @@
+name: Daily Tokyo UR vacancy digest
+
+on:
+  schedule:
+    - cron: "30 8 * * *"
+      timezone: "Asia/Tokyo"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ur-daily-digest
+  cancel-in-progress: false
+
+jobs:
+  digest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.12"
+
+      - name: Run tests
+        run: python -m unittest discover -s tests -v
+
+      - name: Send current vacancy digest
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          UR_CITIES: ${{ vars.UR_CITIES }}
+          UR_LAYOUTS: ${{ vars.UR_LAYOUTS }}
+          UR_MAX_RENT_YEN: ${{ vars.UR_MAX_RENT_YEN || '100000' }}
+          UR_MAX_COMMUTE_MINUTES: ${{ vars.UR_MAX_COMMUTE_MINUTES || '60' }}
+        run: python src/ur_monitor.py --digest

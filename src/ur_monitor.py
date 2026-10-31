@@ -366,10 +366,14 @@ def format_vacancy(item: Vacancy) -> str:
     return "\n".join(lines)
 
 
-def message_chunks(vacancies: list[Vacancy], limit: int = 3900) -> list[str]:
+def message_chunks(
+    vacancies: list[Vacancy],
+    limit: int = 3900,
+    heading: str | None = None,
+) -> list[str]:
     blocks = [format_vacancy(item) for item in vacancies]
     chunks: list[str] = []
-    current = f"🎯 <b>符合你的条件｜新增 {len(vacancies)} 间</b>"
+    current = heading or f"🎯 <b>符合你的条件｜新增 {len(vacancies)} 间</b>"
     for block in blocks:
         candidate = current + "\n\n" + block
         if len(candidate) > limit and current:
@@ -380,6 +384,15 @@ def message_chunks(vacancies: list[Vacancy], limit: int = 3900) -> list[str]:
     if current:
         chunks.append(current)
     return chunks
+
+
+def digest_chunks(vacancies: list[Vacancy]) -> list[str]:
+    if not vacancies:
+        return ["📋 <b>今日符合条件空室</b>\n\n当前暂无符合条件的空室。"]
+    return message_chunks(
+        vacancies,
+        heading=f"📋 <b>今日符合条件空室｜{len(vacancies)} 间</b>",
+    )
 
 
 def send_telegram(token: str, chat_id: str, message: str) -> None:
@@ -402,8 +415,25 @@ def send_telegram(token: str, chat_id: str, message: str) -> None:
         raise RuntimeError(f"Telegram rejected the message: {result}")
 
 
-def run(state_path: Path, *, dry_run: bool = False, notify_initial: bool = False) -> int:
+def run(
+    state_path: Path,
+    *,
+    dry_run: bool = False,
+    notify_initial: bool = False,
+    digest: bool = False,
+) -> int:
     vacancies = fetch_vacancies(Filters.from_env())
+
+    if digest:
+        token = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+        chat_id = os.environ.get("TELEGRAM_CHAT_ID", "")
+        if not token or not chat_id:
+            raise RuntimeError("TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID are required for a digest")
+        for chunk in digest_chunks(vacancies):
+            send_telegram(token, chat_id, chunk)
+        print(f"Daily digest sent with {len(vacancies)} matching vacancies.")
+        return 0
+
     previous = load_state(state_path)
     additions = vacancies if previous is None and notify_initial else new_vacancies(previous, vacancies)
     print(f"Found {len(vacancies)} matching vacancies; {len(additions)} new.")
@@ -435,9 +465,19 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument("--state", type=Path, default=Path("data/state.json"))
     parser.add_argument("--dry-run", action="store_true", help="Fetch and print without sending or saving")
     parser.add_argument("--notify-initial", action="store_true", help="Notify for every vacancy on the first run")
+    parser.add_argument(
+        "--digest",
+        action="store_true",
+        help="Send all currently matching vacancies without changing incremental state",
+    )
     args = parser.parse_args(argv)
     try:
-        return run(args.state, dry_run=args.dry_run, notify_initial=args.notify_initial)
+        return run(
+            args.state,
+            dry_run=args.dry_run,
+            notify_initial=args.notify_initial,
+            digest=args.digest,
+        )
     except Exception as error:
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
