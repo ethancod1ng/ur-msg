@@ -11,6 +11,7 @@ import time
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
+from xml.etree import ElementTree
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlencode
 from urllib.request import Request, urlopen
@@ -29,6 +30,29 @@ REFERER = f"{SITE_BASE}/chintai/kanto/tokyo/list/"
 TOKYO_AREA_IDS = ("01", "02", "03", "04", "05", "06")
 USER_AGENT = "ur-tokyo-telegram-monitor/1.0"
 DEFAULT_MAX_RENT_YEN = 100_000
+DEFAULT_MAX_COMMUTE_MINUTES = 60
+KAYABACHO_STATION_CODE = "1901"
+KAYABACHO_STATION_NAME = "茅場町"
+COMMUTE_XML_URL = (
+    f"{SITE_BASE}/chintai/common/xml/cost-time/"
+    f"cost-time_{KAYABACHO_STATION_CODE.zfill(8)}.xml"
+)
+
+
+@dataclass(frozen=True)
+class RailRoute:
+    station: str
+    train_minutes: int
+    transfers: int
+
+
+@dataclass(frozen=True)
+class CommuteEstimate:
+    station: str
+    total_minutes: int
+    train_minutes: int
+    access_minutes: int
+    transfers: int
 
 
 @dataclass(frozen=True)
@@ -47,6 +71,11 @@ class Vacancy:
     floor: str
     access: str
     url: str
+    commute_station: str = ""
+    commute_minutes: int | None = None
+    commute_train_minutes: int | None = None
+    commute_access_minutes: int | None = None
+    commute_transfers: int | None = None
 
 
 @dataclass(frozen=True)
@@ -54,14 +83,19 @@ class Filters:
     cities: frozenset[str] = frozenset()
     layouts: frozenset[str] = frozenset()
     max_rent_yen: int | None = None
+    max_commute_minutes: int | None = None
 
     @classmethod
     def from_env(cls) -> "Filters":
         max_rent = os.getenv("UR_MAX_RENT_YEN", "").strip()
+        max_commute = os.getenv("UR_MAX_COMMUTE_MINUTES", "").strip()
         return cls(
             cities=_csv_env("UR_CITIES"),
             layouts=_csv_env("UR_LAYOUTS"),
             max_rent_yen=int(max_rent) if max_rent else DEFAULT_MAX_RENT_YEN,
+            max_commute_minutes=(
+                int(max_commute) if max_commute else DEFAULT_MAX_COMMUTE_MINUTES
+            ),
         )
 
 
@@ -81,6 +115,94 @@ def strip_html(value: str) -> str:
     text = re.sub(r"</?li[^>]*>", " / ", text, flags=re.I)
     text = re.sub(r"<[^>]+>", "", text)
     return re.sub(r"\s+", " ", html.unescape(text)).strip(" /\t\r\n")
+
+
+def normalize_station_name(value: str) -> str:
+    value = html.unescape(value).replace("（", "(").replace("）", ")")
+    value = re.sub(r"\((?:東京|東京都)\)$", "", value)
+    return re.sub(r"\s+", "", value).strip()
+
+
+def fetch_bytes(url: str, *, attempts: int = 3) -> bytes:
+    request = Request(url, headers={"User-Agent": USER_AGENT, "Referer": REFERER})
+    for attempt in range(attempts):
+        try:
+            with urlopen(request, timeout=30) as response:
+                return response.read()
+        except (HTTPError, URLError, TimeoutError):
+            if attempt + 1 == attempts:
+                raise
+            time.sleep(2**attempt)
+    raise RuntimeError("unreachable")
+
+
+def parse_commute_routes(xml_bytes: bytes) -> dict[str, RailRoute]:
+    # UR declares EUC-JP; decoding first also avoids ElementTree's limited
+    # multi-byte declaration support on some Python builds.
+    text = xml_bytes.decode("euc_jp").replace('encoding="euc-jp"', 'encoding="utf-8"')
+    root = ElementTree.fromstring(text)
+    routes: dict[str, RailRoute] = {
+        normalize_station_name(KAYABACHO_STATION_NAME): RailRoute(
+            KAYABACHO_STATION_NAME, 0, 0
+        )
+    }
+    for row in root.findall(".//stationTo"):
+        station = row.findtext("stationName", default="")
+        route = RailRoute(
+            station=station,
+            train_minutes=int(row.findtext("costTime", default="0")),
+            transfers=int(row.findtext("changeTimes", default="0")),
+        )
+        key = normalize_station_name(station)
+        current = routes.get(key)
+        if current is None or (route.train_minutes, route.transfers) < (
+            current.train_minutes,
+            current.transfers,
+        ):
+            routes[key] = route
+    return routes
+
+
+def fetch_commute_routes() -> dict[str, RailRoute]:
+    return parse_commute_routes(fetch_bytes(COMMUTE_XML_URL))
+
+
+def _duration_max(text: str, label: str) -> int:
+    match = re.search(rf"{label}\s*(\d+)(?:\s*[～〜~-]\s*(\d+))?\s*分", text)
+    if not match:
+        return 0
+    return int(match.group(2) or match.group(1))
+
+
+def estimate_commute(
+    access_html: str, routes: dict[str, RailRoute]
+) -> CommuteEstimate | None:
+    entries = re.findall(r"<li[^>]*>(.*?)</li>", access_html or "", flags=re.I | re.S)
+    if not entries and access_html:
+        entries = [access_html]
+
+    estimates: list[CommuteEstimate] = []
+    for entry in entries:
+        text = strip_html(entry)
+        station_match = re.search(r"[「｢]([^」｣]+)[」｣]駅", text)
+        if not station_match:
+            continue
+        route = routes.get(normalize_station_name(station_match.group(1)))
+        if route is None:
+            continue
+        access_minutes = _duration_max(text, "バス") + _duration_max(text, "徒歩")
+        estimates.append(
+            CommuteEstimate(
+                station=route.station,
+                total_minutes=route.train_minutes + access_minutes,
+                train_minutes=route.train_minutes,
+                access_minutes=access_minutes,
+                transfers=route.transfers,
+            )
+        )
+    if not estimates:
+        return None
+    return min(estimates, key=lambda item: (item.total_minutes, item.transfers))
 
 
 def post_json(endpoint: str, fields: dict[str, str], *, attempts: int = 3) -> Any:
@@ -106,7 +228,11 @@ def post_json(endpoint: str, fields: dict[str, str], *, attempts: int = 3) -> An
     raise RuntimeError("unreachable")
 
 
-def normalize_vacancy(building: dict[str, Any], room: dict[str, Any]) -> Vacancy:
+def normalize_vacancy(
+    building: dict[str, Any],
+    room: dict[str, Any],
+    commute: CommuteEstimate | None = None,
+) -> Vacancy:
     room_url = room.get("urlDetail", "")
     if room_url.startswith("/"):
         room_url = SITE_BASE + room_url
@@ -129,6 +255,11 @@ def normalize_vacancy(building: dict[str, Any], room: dict[str, Any]) -> Vacancy
         floor=strip_html(str(room.get("floor", ""))),
         access=strip_html(str(building.get("access", ""))),
         url=room_url,
+        commute_station=commute.station if commute else "",
+        commute_minutes=commute.total_minutes if commute else None,
+        commute_train_minutes=commute.train_minutes if commute else None,
+        commute_access_minutes=commute.access_minutes if commute else None,
+        commute_transfers=commute.transfers if commute else None,
     )
 
 
@@ -137,13 +268,23 @@ def matches(vacancy: Vacancy, filters: Filters) -> bool:
         (filters.cities and vacancy.city not in filters.cities)
         or (filters.layouts and vacancy.layout not in filters.layouts)
         or (filters.max_rent_yen is not None and vacancy.rent_yen > filters.max_rent_yen)
+        or (
+            filters.max_commute_minutes is not None
+            and (
+                vacancy.commute_minutes is None
+                or vacancy.commute_minutes > filters.max_commute_minutes
+            )
+        )
     )
 
 
 def fetch_vacancies(
     filters: Filters,
     fetch: Callable[[str, dict[str, str]], Any] = post_json,
+    commute_routes: dict[str, RailRoute] | None = None,
 ) -> list[Vacancy]:
+    if filters.max_commute_minutes is not None and commute_routes is None:
+        commute_routes = fetch_commute_routes()
     buildings: list[dict[str, Any]] = []
     for area in TOKYO_AREA_IDS:
         rows = fetch("bukken/search/list_bukken/", {"tdfk": "13", "area": area, "vacancy": "1"})
@@ -151,9 +292,14 @@ def fetch_vacancies(
 
     vacancies: list[Vacancy] = []
     for building in buildings:
+        commute = (
+            estimate_commute(str(building.get("access", "")), commute_routes)
+            if commute_routes is not None
+            else None
+        )
         rooms = fetch("room/list/", {"tdfk": "13", "id": str(building["id"]), "mode": "init"})
         for room in rooms:
-            vacancy = normalize_vacancy(building, room)
+            vacancy = normalize_vacancy(building, room, commute)
             if matches(vacancy, filters):
                 vacancies.append(vacancy)
     return sorted(vacancies, key=lambda item: (item.city, item.building, item.rent_yen, item.room))
@@ -186,22 +332,44 @@ def new_vacancies(previous: dict[str, dict[str, Any]] | None, current: list[Vaca
 
 
 def format_vacancy(item: Vacancy) -> str:
-    details = " / ".join(value for value in (item.layout, item.floor_space, item.floor) if value)
+    floor = item.floor.replace("階", "楼")
+    details = "｜".join(value for value in (item.layout, item.floor_space, floor) if value)
+    common_fee = re.sub(r"^(?:共益費|共益费)\s*[：:]?\s*", "", item.common_fee)
+    common_fee = common_fee.strip("（）() ")
+    try:
+        monthly_total = item.rent_yen + parse_yen(item.common_fee)
+    except ValueError:
+        monthly_total = None
     lines = [
-        f"🏠 <b>{html.escape(item.building)}</b>（{html.escape(item.city)}）",
-        f"{html.escape(item.room)} · {html.escape(details)}",
-        f"💴 {html.escape(item.rent)} · {html.escape(item.common_fee)}",
+        f"🏠 <b>{html.escape(item.building)}</b>｜{html.escape(item.city)}",
+        f"🚪 {html.escape(item.room)}",
+        f"💴 月租 <b>{html.escape(item.rent)}</b>｜共益费 {html.escape(common_fee)}",
     ]
-    if item.access:
-        lines.append(f"🚉 {html.escape(item.access)}")
-    lines.append(f'<a href="{html.escape(item.url, quote=True)}">UR 详情页</a>')
+    if monthly_total is not None:
+        lines.append(f"💰 每月合计约 <b>{monthly_total:,}円</b>")
+    if item.commute_minutes is not None:
+        lines.append(
+            f"🚆 到茅場町约 <b>{item.commute_minutes} 分钟</b>｜"
+            f"换乘 {item.commute_transfers} 次"
+        )
+        lines.append(
+            f"📍 {html.escape(item.commute_station)}站｜"
+            f"房源到车站按最长约 {item.commute_access_minutes} 分钟"
+        )
+    lines.extend(
+        [
+            f"📐 {html.escape(details)}",
+            "✨ 10万以内 · 保守估算通勤1小时内",
+            f'<a href="{html.escape(item.url, quote=True)}">查看 UR 详情</a>',
+        ]
+    )
     return "\n".join(lines)
 
 
 def message_chunks(vacancies: list[Vacancy], limit: int = 3900) -> list[str]:
     blocks = [format_vacancy(item) for item in vacancies]
     chunks: list[str] = []
-    current = f"🔔 <b>东京 UR 新增空室：{len(vacancies)} 间</b>"
+    current = f"🎯 <b>符合你的条件｜新增 {len(vacancies)} 间</b>"
     for block in blocks:
         candidate = current + "\n\n" + block
         if len(candidate) > limit and current:
@@ -242,7 +410,10 @@ def run(state_path: Path, *, dry_run: bool = False, notify_initial: bool = False
 
     if dry_run:
         for item in vacancies:
-            print(f"- {item.city} | {item.building} | {item.room} | {item.rent} | {item.url}")
+            print(
+                f"- {item.city} | {item.building} | {item.room} | {item.rent} | "
+                f"茅場町 {item.commute_minutes}分 | {item.url}"
+            )
         return 0
 
     if additions:

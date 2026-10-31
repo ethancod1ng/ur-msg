@@ -42,6 +42,7 @@ jobs:
           UR_CITIES: ${{ vars.UR_CITIES }}
           UR_LAYOUTS: ${{ vars.UR_LAYOUTS }}
           UR_MAX_RENT_YEN: ${{ vars.UR_MAX_RENT_YEN || '100000' }}
+          UR_MAX_COMMUTE_MINUTES: ${{ vars.UR_MAX_COMMUTE_MINUTES || '60' }}
         run: |
           extra=""
           if [ "${{ inputs.notify_initial }}" = "true" ]; then extra="--notify-initial"; fi
