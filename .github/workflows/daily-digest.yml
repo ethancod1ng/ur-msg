@@ -1,9 +1,6 @@
 name: Daily Tokyo UR vacancy digest
 
 on:
-  schedule:
-    - cron: "30 8 * * *"
-      timezone: "Asia/Tokyo"
   workflow_dispatch:
 
 permissions:
