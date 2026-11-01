@@ -143,6 +143,52 @@ class MonitorTests(unittest.TestCase):
         )
         self.assertIn("当前暂无符合条件的空室", ur_monitor.digest_chunks([])[0])
 
+    def test_builds_dashboard_snapshot_payload(self):
+        vacancy = ur_monitor.normalize_vacancy(BUILDING, ROOM)
+        payload = ur_monitor.build_snapshot(
+            [vacancy],
+            snapshot_id="run-123-1",
+            started_at="2026-11-01T00:00:00Z",
+            completed_at="2026-11-01T00:01:00Z",
+        )
+        self.assertEqual("success", payload["status"])
+        self.assertEqual("run-123-1", payload["snapshot_id"])
+        self.assertEqual(vacancy.key, payload["vacancies"][0]["key"])
+
+    def test_uploads_snapshot_with_bearer_token(self):
+        captured = {}
+
+        class FakeResponse:
+            def __enter__(self):
+                return self
+
+            def __exit__(self, *_args):
+                return False
+
+            def read(self):
+                return b'{"ok":true}'
+
+        def opener(request, timeout):
+            captured["request"] = request
+            captured["timeout"] = timeout
+            return FakeResponse()
+
+        ur_monitor.upload_snapshot(
+            {"snapshot_id": "run-1", "vacancies": []},
+            "https://example.workers.dev/api/snapshots",
+            "secret-token",
+            opener=opener,
+        )
+
+        self.assertEqual("Bearer secret-token", captured["request"].get_header("Authorization"))
+        self.assertEqual("POST", captured["request"].method)
+        self.assertEqual(30, captured["timeout"])
+
+    def test_dashboard_configuration_requires_both_values(self):
+        with patch.dict(os.environ, {"DASHBOARD_API_URL": "https://example.com"}, clear=True):
+            with self.assertRaisesRegex(RuntimeError, "SNAPSHOT_API_TOKEN"):
+                ur_monitor.upload_configured_snapshot({"snapshot_id": "x"})
+
     @patch("ur_monitor.save_state")
     @patch("ur_monitor.load_state")
     @patch("ur_monitor.send_telegram")

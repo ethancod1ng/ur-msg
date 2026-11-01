@@ -8,6 +8,8 @@ import re
 import sys
 import tempfile
 import time
+import uuid
+from datetime import datetime, timezone
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Callable, Iterable
@@ -415,13 +417,95 @@ def send_telegram(token: str, chat_id: str, message: str) -> None:
         raise RuntimeError(f"Telegram rejected the message: {result}")
 
 
+def utc_now() -> str:
+    return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
+
+
+def snapshot_id() -> str:
+    run_id = os.getenv("GITHUB_RUN_ID", "").strip()
+    attempt = os.getenv("GITHUB_RUN_ATTEMPT", "1").strip()
+    return f"github-{run_id}-{attempt}" if run_id else f"local-{uuid.uuid4()}"
+
+
+def build_snapshot(
+    vacancies: Iterable[Vacancy],
+    *,
+    snapshot_id: str,
+    started_at: str,
+    completed_at: str,
+) -> dict[str, Any]:
+    return {
+        "snapshot_id": snapshot_id,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "status": "success",
+        "vacancies": [asdict(item) for item in vacancies],
+    }
+
+
+def build_failure_snapshot(
+    error: Exception,
+    *,
+    snapshot_id: str,
+    started_at: str,
+    completed_at: str,
+) -> dict[str, Any]:
+    return {
+        "snapshot_id": snapshot_id,
+        "started_at": started_at,
+        "completed_at": completed_at,
+        "status": "failure",
+        "error_summary": str(error)[:500],
+        "vacancies": [],
+    }
+
+
+def upload_snapshot(
+    payload: dict[str, Any],
+    api_url: str,
+    token: str,
+    *,
+    opener: Callable[..., Any] = urlopen,
+) -> None:
+    request = Request(
+        api_url,
+        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
+        headers={
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "User-Agent": USER_AGENT,
+        },
+        method="POST",
+    )
+    with opener(request, timeout=30) as response:
+        result = json.load(response)
+    if not result.get("ok"):
+        raise RuntimeError("Dashboard API rejected the vacancy snapshot")
+
+
+def upload_configured_snapshot(payload: dict[str, Any]) -> bool:
+    api_url = os.getenv("DASHBOARD_API_URL", "").strip()
+    token = os.getenv("SNAPSHOT_API_TOKEN", "").strip()
+    if not api_url and not token:
+        return False
+    if not api_url or not token:
+        missing = "DASHBOARD_API_URL" if not api_url else "SNAPSHOT_API_TOKEN"
+        raise RuntimeError(f"{missing} is required for dashboard snapshots")
+    upload_snapshot(payload, api_url, token)
+    return True
+
+
 def run(
     state_path: Path,
     *,
     dry_run: bool = False,
     notify_initial: bool = False,
     digest: bool = False,
+    started_at: str | None = None,
+    run_snapshot_id: str | None = None,
 ) -> int:
+    started_at = started_at or utc_now()
+    run_snapshot_id = run_snapshot_id or snapshot_id()
     vacancies = fetch_vacancies(Filters.from_env())
 
     if digest:
@@ -437,6 +521,15 @@ def run(
     previous = load_state(state_path)
     additions = vacancies if previous is None and notify_initial else new_vacancies(previous, vacancies)
     print(f"Found {len(vacancies)} matching vacancies; {len(additions)} new.")
+
+    upload_configured_snapshot(
+        build_snapshot(
+            vacancies,
+            snapshot_id=run_snapshot_id,
+            started_at=started_at,
+            completed_at=utc_now(),
+        )
+    )
 
     if dry_run:
         for item in vacancies:
@@ -471,14 +564,30 @@ def main(argv: list[str] | None = None) -> int:
         help="Send all currently matching vacancies without changing incremental state",
     )
     args = parser.parse_args(argv)
+    started_at = utc_now()
+    run_snapshot_id = snapshot_id()
     try:
         return run(
             args.state,
             dry_run=args.dry_run,
             notify_initial=args.notify_initial,
             digest=args.digest,
+            started_at=started_at,
+            run_snapshot_id=run_snapshot_id,
         )
     except Exception as error:
+        if not args.digest:
+            try:
+                upload_configured_snapshot(
+                    build_failure_snapshot(
+                        error,
+                        snapshot_id=run_snapshot_id,
+                        started_at=started_at,
+                        completed_at=utc_now(),
+                    )
+                )
+            except Exception as report_error:
+                print(f"ERROR reporting dashboard failure: {report_error}", file=sys.stderr)
         print(f"ERROR: {error}", file=sys.stderr)
         return 1
 

@@ -1,3 +1,5 @@
+import { getDashboard, SnapshotValidationError, writeSnapshot } from "./database.js";
+
 const requiredKeys = [
   "GITHUB_TOKEN",
   "GITHUB_OWNER",
@@ -6,6 +8,8 @@ const requiredKeys = [
 ];
 
 const API_CACHE_CONTROL = "public, max-age=60, s-maxage=300";
+const DASHBOARD_CACHE_CONTROL = "public, max-age=30, s-maxage=60";
+const MAX_SNAPSHOT_BYTES = 1024 * 1024;
 
 function jsonResponse(payload, init = {}) {
   const headers = new Headers(init.headers);
@@ -65,6 +69,70 @@ export async function vacancyResponse(env, fetchImpl = fetch) {
   );
 }
 
+function tokensMatch(actual, expected) {
+  if (!actual || !expected || actual.length !== expected.length) return false;
+  let mismatch = 0;
+  for (let index = 0; index < actual.length; index += 1) {
+    mismatch |= actual.charCodeAt(index) ^ expected.charCodeAt(index);
+  }
+  return mismatch === 0;
+}
+
+async function dashboardResponse(env) {
+  if (!env.DB) {
+    return jsonResponse(
+      { error: "Dashboard data is temporarily unavailable." },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+  try {
+    return jsonResponse(await getDashboard(env.DB), {
+      headers: { "Cache-Control": DASHBOARD_CACHE_CONTROL },
+    });
+  } catch {
+    return jsonResponse(
+      { error: "Dashboard data is temporarily unavailable." },
+      { status: 503, headers: { "Cache-Control": "no-store" } },
+    );
+  }
+}
+
+async function snapshotResponse(request, env) {
+  const headers = { "Cache-Control": "no-store" };
+  const token = request.headers.get("Authorization")?.replace(/^Bearer\s+/i, "") || "";
+  if (!tokensMatch(token, env.SNAPSHOT_API_TOKEN || "")) {
+    return jsonResponse({ error: "Unauthorized." }, { status: 401, headers });
+  }
+  if (!request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json")) {
+    return jsonResponse({ error: "Content-Type must be application/json." }, { status: 415, headers });
+  }
+  const declaredLength = Number(request.headers.get("Content-Length") || 0);
+  if (declaredLength > MAX_SNAPSHOT_BYTES) {
+    return jsonResponse({ error: "Snapshot is too large." }, { status: 413, headers });
+  }
+  let raw;
+  try {
+    raw = await request.text();
+    if (new TextEncoder().encode(raw).byteLength > MAX_SNAPSHOT_BYTES) {
+      return jsonResponse({ error: "Snapshot is too large." }, { status: 413, headers });
+    }
+    raw = JSON.parse(raw);
+  } catch {
+    return jsonResponse({ error: "Invalid JSON body." }, { status: 400, headers });
+  }
+  if (!env.DB) return jsonResponse({ error: "Snapshot storage is unavailable." }, { status: 503, headers });
+  try {
+    const result = await writeSnapshot(env.DB, raw);
+    return jsonResponse({ ok: true, ...result }, { headers });
+  } catch (error) {
+    const validationError = error instanceof SnapshotValidationError;
+    return jsonResponse(
+      { error: validationError ? error.message : "Snapshot storage failed." },
+      { status: validationError ? 400 : 503, headers },
+    );
+  }
+}
+
 export function workflowForSchedule(cron, env) {
   const workflows = {
     "*/5 * * * *": env.GITHUB_WORKFLOW,
@@ -121,6 +189,12 @@ export async function dispatchWorkflow(
 export default {
   async fetch(request, env = {}, _ctx, fetchImpl = fetch) {
     const url = new URL(request.url);
+    if (url.pathname === "/api/dashboard" && request.method === "GET") {
+      return dashboardResponse(env);
+    }
+    if (url.pathname === "/api/snapshots" && request.method === "POST") {
+      return snapshotResponse(request, env);
+    }
     if (url.pathname === "/api/vacancies") {
       return vacancyResponse(env, fetchImpl);
     }

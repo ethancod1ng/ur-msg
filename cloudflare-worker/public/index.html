@@ -25,9 +25,10 @@
         <p class="intro">月租不超过 10 万日元，到茅场町预计 60 分钟以内。数据由自动任务持续更新。</p>
       </div>
       <div class="summary" aria-live="polite">
+        <div class="monitor-summary"><strong id="monitor-label"><i class="status-dot"></i>读取中</strong><span id="monitor-message">正在读取监控状态</span></div>
+        <div><strong id="last-success">—</strong><span>最近成功检查</span></div>
         <div><strong id="total-count">—</strong><span>当前空房</span></div>
-        <div><strong id="city-count">—</strong><span>覆盖区域</span></div>
-        <div><strong id="lowest-rent">—</strong><span>最低月租</span></div>
+        <div><strong id="new-count">—</strong><span>24 小时新增</span></div>
       </div>
     </header>
 
@@ -39,13 +40,38 @@
           <input id="search" type="search" placeholder="搜索区域、房源或车站">
         </label>
         <label>
+          <span class="sr-only">区域</span>
+          <select id="city-filter"><option value="">全部区域</option></select>
+        </label>
+        <label>
           <span class="sr-only">户型</span>
           <select id="layout-filter"><option value="">全部户型</option></select>
         </label>
         <label>
+          <span class="sr-only">最高月总额</span>
+          <select id="price-filter">
+            <option value="">不限月总额</option>
+            <option value="85000">最高 8.5 万円</option>
+            <option value="90000">最高 9 万円</option>
+            <option value="95000">最高 9.5 万円</option>
+            <option value="100000">最高 10 万円</option>
+            <option value="110000">最高 11 万円</option>
+          </select>
+        </label>
+        <label>
+          <span class="sr-only">最长通勤时间</span>
+          <select id="commute-filter">
+            <option value="">不限通勤时间</option>
+            <option value="45">最长 45 分钟</option>
+            <option value="50">最长 50 分钟</option>
+            <option value="60">最长 60 分钟</option>
+          </select>
+        </label>
+        <label>
           <span class="sr-only">排序方式</span>
           <select id="sort-order">
-            <option value="rent">租金从低到高</option>
+            <option value="recommended">新增优先 · 月总额</option>
+            <option value="rent">月总额从低到高</option>
             <option value="commute">通勤从短到长</option>
             <option value="area">面积从大到小</option>
           </select>
@@ -57,7 +83,7 @@
       </section>
 
       <div class="results-heading">
-        <div><h2>当前可申请房源</h2><p id="result-label">正在读取最新数据…</p></div>
+        <div><h2>当前可申请房源</h2><p id="result-label">正在读取 D1 最新数据…</p></div>
         <p id="sync-time" class="sync-time"></p>
       </div>
 

@@ -5,7 +5,9 @@ This Worker triggers the existing GitHub Actions on two schedules:
 - `monitor.yml` every five minutes.
 - `daily-digest.yml` every day at 08:30 Japan time (`23:30` UTC).
 
-It also serves a public, responsive vacancy dashboard from Workers Static Assets. The dashboard reads the latest committed `data/state.json` through `/api/vacancies`, refreshes every five minutes, and does not expose any GitHub or Telegram secrets. `/health` remains available for health checks.
+It also serves a public, responsive vacancy dashboard from Workers Static Assets. The dashboard reads current vacancies and monitor health from Cloudflare D1 through `/api/dashboard`, refreshes every five minutes, and does not expose any GitHub or Telegram secrets. `/health` remains available for Worker health checks.
+
+Successful monitor runs upload a complete snapshot to the authenticated `/api/snapshots` endpoint. D1 retains first/last-seen timestamps while the public API returns only active vacancies.
 
 ## One-time setup
 
@@ -29,11 +31,22 @@ It also serves a public, responsive vacancy dashboard from Workers Static Assets
    npm run deploy
    ```
 
+The D1 database is bound as `DB`. Apply schema migrations before deploying a schema change:
+
+```powershell
+npx wrangler d1 migrations apply ur-msg --remote
+```
+
+The following secrets configure snapshot uploads:
+
+- Cloudflare Worker secret: `SNAPSHOT_API_TOKEN`
+- GitHub Actions secrets: `SNAPSHOT_API_TOKEN` and `DASHBOARD_API_URL`
+
 ## Verification
 
 Watch Worker logs with `npx wrangler tail`, then confirm a new run appears in GitHub Actions after the next five-minute boundary. GitHub labels these externally triggered runs as `workflow_dispatch`.
 
-Open the deployed Worker URL to view the dashboard. Check `/api/vacancies` for the normalized JSON feed and `/health` for the scheduler health response.
+Open the deployed Worker URL to view the dashboard. Check `/api/dashboard` for the public D1-backed feed and `/health` for the scheduler health response.
 
 After the external schedule is verified, remove the `schedule` block from `.github/workflows/monitor.yml` to prevent duplicate runs.
 

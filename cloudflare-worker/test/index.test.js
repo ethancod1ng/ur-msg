@@ -6,6 +6,34 @@ import worker, {
   workflowForSchedule,
 } from "../src/index.js";
 
+function dashboardDb() {
+  return {
+    prepare(sql) {
+      return {
+        bind() { return this; },
+        async first() {
+          if (sql.includes("FROM monitor_runs mr")) {
+            return {
+              status: "success",
+              completed_at: "2026-11-01T00:00:00Z",
+              last_success_at: new Date().toISOString(),
+            };
+          }
+          return null;
+        },
+        async all() {
+          if (sql.includes("FROM vacancies WHERE is_active = 1")) {
+            return { results: [{ key: "room", city: "足立区", layout: "1LDK", first_seen_at: new Date().toISOString() }] };
+          }
+          return { results: [] };
+        },
+        async run() { return { success: true }; },
+      };
+    },
+    async batch() { return []; },
+  };
+}
+
 const env = {
   GITHUB_TOKEN: "test-token",
   GITHUB_OWNER: "ethancod1ng",
@@ -148,6 +176,75 @@ test("forwards dashboard requests to static assets", async () => {
 
   assert.equal(await response.text(), "dashboard");
   assert.equal(forwardedUrl, "https://example.com/");
+});
+
+test("returns the D1-backed dashboard", async () => {
+  const response = await worker.fetch(
+    new Request("https://example.com/api/dashboard"),
+    { DB: dashboardDb() },
+  );
+  const payload = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(payload.stats.vacancy_count, 1);
+  assert.equal(payload.monitor.code, "healthy");
+  assert.deepEqual(payload.filters.cities, ["足立区"]);
+});
+
+test("rejects unauthenticated snapshot writes", async () => {
+  const response = await worker.fetch(
+    new Request("https://example.com/api/snapshots", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: "{}",
+    }),
+    { DB: dashboardDb(), SNAPSHOT_API_TOKEN: "secret" },
+  );
+
+  assert.equal(response.status, 401);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});
+
+test("accepts an authenticated snapshot", async () => {
+  const now = new Date().toISOString();
+  const response = await worker.fetch(
+    new Request("https://example.com/api/snapshots", {
+      method: "POST",
+      headers: {
+        Authorization: "Bearer secret",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        snapshot_id: "run-1",
+        started_at: now,
+        completed_at: now,
+        status: "success",
+        vacancies: [],
+      }),
+    }),
+    { DB: dashboardDb(), SNAPSHOT_API_TOKEN: "secret" },
+  );
+
+  assert.equal(response.status, 200);
+  assert.deepEqual(await response.json(), {
+    ok: true,
+    duplicate: false,
+    new_count: 0,
+    removed_count: 1,
+  });
+});
+
+test("rejects invalid snapshot content types", async () => {
+  const response = await worker.fetch(
+    new Request("https://example.com/api/snapshots", {
+      method: "POST",
+      headers: { Authorization: "Bearer secret", "Content-Type": "text/plain" },
+      body: "{}",
+    }),
+    { DB: dashboardDb(), SNAPSHOT_API_TOKEN: "secret" },
+  );
+
+  assert.equal(response.status, 415);
 });
 
 test("rejects a missing GitHub token before making a request", async () => {
