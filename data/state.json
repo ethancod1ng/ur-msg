@@ -22,27 +22,6 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2340_room.html?JKSS=626011120"
     },
     {
-      "access": "小田急小田原線「千歳船橋」駅バス4～10分 徒歩1～3分 / / 京王線「八幡山」駅バス5～8分 徒歩1～3分 / / 小田急小田原線「千歳船橋」駅 徒歩16～20分",
-      "building": "希望ヶ丘",
-      "building_id": "20_2340",
-      "city": "世田谷区",
-      "common_fee": "共益費：3,600円",
-      "commute_access_minutes": 11,
-      "commute_minutes": 54,
-      "commute_station": "八幡山",
-      "commute_train_minutes": 43,
-      "commute_transfers": 2,
-      "floor": "9階",
-      "floor_space": "31㎡",
-      "key": "20_2340:708010908",
-      "layout": "1K",
-      "rent": "84,600円",
-      "rent_yen": 84600,
-      "room": "7-8-1号棟908号室",
-      "room_id": "708010908",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2340_room.html?JKSS=708010908"
-    },
-    {
       "access": "西武新宿線ほか｢小平｣駅 徒歩1分",
       "building": "小平駅南口",
       "building_id": "20_1770",
