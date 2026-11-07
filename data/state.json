@@ -20,6 +20,27 @@
       "room": "7号棟737号室",
       "room_id": "000070737",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000070737"
+    },
+    {
+      "access": "JR京浜東北・根岸線「王子」駅バス7分 徒歩2～6分 / / 東京メトロ南北線「王子」駅バス7分 徒歩2～6分",
+      "building": "豊島五丁目",
+      "building_id": "20_2320",
+      "city": "北区",
+      "common_fee": "共益費：3,300円",
+      "commute_access_minutes": 13,
+      "commute_minutes": 44,
+      "commute_station": "王子",
+      "commute_train_minutes": 31,
+      "commute_transfers": 1,
+      "floor": "2階",
+      "floor_space": "48㎡",
+      "key": "20_2320:000010210",
+      "layout": "1LDK",
+      "rent": "89,800円",
+      "rent_yen": 89800,
+      "room": "1号棟210号室",
+      "room_id": "000010210",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000010210"
     }
   ],
   "version": 1
