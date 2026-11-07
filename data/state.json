@@ -1,26 +1,4 @@
 {
-  "vacancies": [
-    {
-      "access": "都営三田線「高島平」駅 徒歩2～11分 / / 都営三田線「新高島平」駅 徒歩4～22分",
-      "building": "高島平",
-      "building_id": "20_2250",
-      "city": "板橋区",
-      "common_fee": "共益費：4,200円",
-      "commute_access_minutes": 11,
-      "commute_minutes": 53,
-      "commute_station": "高島平",
-      "commute_train_minutes": 42,
-      "commute_transfers": 1,
-      "floor": "2階",
-      "floor_space": "46㎡",
-      "key": "20_2250:233050205",
-      "layout": "2DK",
-      "rent": "96,000円",
-      "rent_yen": 96000,
-      "room": "2-33-5号棟205号室",
-      "room_id": "233050205",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=233050205"
-    }
-  ],
+  "vacancies": [],
   "version": 1
 }
