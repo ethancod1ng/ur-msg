@@ -20,27 +20,6 @@
       "room": "7号棟737号室",
       "room_id": "000070737",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000070737"
-    },
-    {
-      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩2～5分",
-      "building": "竹の塚第三",
-      "building_id": "20_1370",
-      "city": "足立区",
-      "common_fee": "共益費：3,700円",
-      "commute_access_minutes": 5,
-      "commute_minutes": 38,
-      "commute_station": "竹ノ塚",
-      "commute_train_minutes": 33,
-      "commute_transfers": 1,
-      "floor": "5階",
-      "floor_space": "43㎡",
-      "key": "20_1370:000030504",
-      "layout": "1LDK",
-      "rent": "77,900円",
-      "rent_yen": 77900,
-      "room": "3号棟504号室",
-      "room_id": "000030504",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1370_room.html?JKSS=000030504"
     }
   ],
   "version": 1
