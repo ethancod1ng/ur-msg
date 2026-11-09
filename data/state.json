@@ -11,15 +11,15 @@
       "commute_station": "八幡山",
       "commute_train_minutes": 43,
       "commute_transfers": 2,
-      "floor": "9階",
+      "floor": "2階",
       "floor_space": "31㎡",
-      "key": "20_2340:708010929",
+      "key": "20_2340:708010233",
       "layout": "1DK",
-      "rent": "84,600円",
-      "rent_yen": 84600,
-      "room": "7-8-1号棟929号室",
-      "room_id": "708010929",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2340_room.html?JKSS=708010929"
+      "rent": "83,700円",
+      "rent_yen": 83700,
+      "room": "7-8-1号棟233号室",
+      "room_id": "708010233",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2340_room.html?JKSS=708010233"
     },
     {
       "access": "JR京浜東北・根岸線「王子」駅バス7分 徒歩2～6分 / / 東京メトロ南北線「王子」駅バス7分 徒歩2～6分",
@@ -41,6 +41,27 @@
       "room": "7号棟737号室",
       "room_id": "000070737",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000070737"
+    },
+    {
+      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
+      "building": "竹の塚第一",
+      "building_id": "20_1300",
+      "city": "足立区",
+      "common_fee": "共益費：3,500円",
+      "commute_access_minutes": 23,
+      "commute_minutes": 40,
+      "commute_station": "北千住",
+      "commute_train_minutes": 17,
+      "commute_transfers": 0,
+      "floor": "4階",
+      "floor_space": "40㎡",
+      "key": "20_1300:000032401",
+      "layout": "2DK",
+      "rent": "82,500円",
+      "rent_yen": 82500,
+      "room": "32号棟401号室",
+      "room_id": "000032401",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1300_room.html?JKSS=000032401"
     }
   ],
   "version": 1
