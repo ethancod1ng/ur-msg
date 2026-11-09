@@ -1,26 +1,4 @@
 {
-  "vacancies": [
-    {
-      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
-      "building": "竹の塚第一",
-      "building_id": "20_1300",
-      "city": "足立区",
-      "common_fee": "共益費：3,500円",
-      "commute_access_minutes": 23,
-      "commute_minutes": 40,
-      "commute_station": "北千住",
-      "commute_train_minutes": 17,
-      "commute_transfers": 0,
-      "floor": "4階",
-      "floor_space": "40㎡",
-      "key": "20_1300:000032401",
-      "layout": "2DK",
-      "rent": "82,500円",
-      "rent_yen": 82500,
-      "room": "32号棟401号室",
-      "room_id": "000032401",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1300_room.html?JKSS=000032401"
-    }
-  ],
+  "vacancies": [],
   "version": 1
 }
