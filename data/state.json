@@ -22,6 +22,27 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000111203"
     },
     {
+      "access": "JR京浜東北・根岸線「王子」駅バス7分 徒歩2～6分 / / 東京メトロ南北線「王子」駅バス7分 徒歩2～6分",
+      "building": "豊島五丁目",
+      "building_id": "20_2320",
+      "city": "北区",
+      "common_fee": "共益費：3,300円",
+      "commute_access_minutes": 13,
+      "commute_minutes": 44,
+      "commute_station": "王子",
+      "commute_train_minutes": 31,
+      "commute_transfers": 1,
+      "floor": "9階",
+      "floor_space": "48㎡",
+      "key": "20_2320:000050913",
+      "layout": "1LDK",
+      "rent": "92,100円",
+      "rent_yen": 92100,
+      "room": "5号棟913号室",
+      "room_id": "000050913",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2320_room.html?JKSS=000050913"
+    },
+    {
       "access": "西武新宿線ほか｢小平｣駅 徒歩1分",
       "building": "小平駅南口",
       "building_id": "20_1770",
@@ -83,6 +104,27 @@
       "room": "30-16号棟502号室",
       "room_id": "030016502",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2160_room.html?JKSS=030016502"
+    },
+    {
+      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩6～12分",
+      "building": "竹の塚第二",
+      "building_id": "20_1310",
+      "city": "足立区",
+      "common_fee": "共益費：4,800円",
+      "commute_access_minutes": 12,
+      "commute_minutes": 45,
+      "commute_station": "竹ノ塚",
+      "commute_train_minutes": 33,
+      "commute_transfers": 1,
+      "floor": "3階",
+      "floor_space": "41㎡",
+      "key": "20_1310:000006305",
+      "layout": "2DK",
+      "rent": "86,300円",
+      "rent_yen": 86300,
+      "room": "6号棟305号室",
+      "room_id": "000006305",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1310_room.html?JKSS=000006305"
     }
   ],
   "version": 1
