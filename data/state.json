@@ -64,27 +64,6 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=226040614"
     },
     {
-      "access": "東武伊勢崎線「西新井」駅 徒歩8～13分",
-      "building": "栗原",
-      "building_id": "20_1600",
-      "city": "足立区",
-      "common_fee": "共益費：4,270円",
-      "commute_access_minutes": 13,
-      "commute_minutes": 43,
-      "commute_station": "西新井",
-      "commute_train_minutes": 30,
-      "commute_transfers": 1,
-      "floor": "1階",
-      "floor_space": "40㎡",
-      "key": "20_1600:000008108",
-      "layout": "2DK",
-      "rent": "82,200円",
-      "rent_yen": 82200,
-      "room": "8号棟108号室",
-      "room_id": "000008108",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1600_room.html?JKSS=000008108"
-    },
-    {
       "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
       "building": "竹の塚第一アネックス",
       "building_id": "20_1301",
@@ -104,27 +83,6 @@
       "room": "34号棟203号室",
       "room_id": "000340203",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1301_room.html?JKSS=000340203"
-    },
-    {
-      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩6～12分",
-      "building": "竹の塚第二",
-      "building_id": "20_1310",
-      "city": "足立区",
-      "common_fee": "共益費：4,800円",
-      "commute_access_minutes": 12,
-      "commute_minutes": 45,
-      "commute_station": "竹ノ塚",
-      "commute_train_minutes": 33,
-      "commute_transfers": 1,
-      "floor": "3階",
-      "floor_space": "41㎡",
-      "key": "20_1310:000006305",
-      "layout": "2DK",
-      "rent": "86,300円",
-      "rent_yen": 86300,
-      "room": "6号棟305号室",
-      "room_id": "000006305",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1310_room.html?JKSS=000006305"
     }
   ],
   "version": 1
