@@ -43,27 +43,6 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=233050205"
     },
     {
-      "access": "JR常盤線「亀有」駅 徒歩18～23分 / / JR常磐線「亀有」駅バス3分 徒歩2～4分 / / 東京メトロ千代田線「北綾瀬」駅 徒歩16～19分",
-      "building": "大谷田一丁目",
-      "building_id": "20_2810",
-      "city": "足立区",
-      "common_fee": "共益費：3,700円",
-      "commute_access_minutes": 7,
-      "commute_minutes": 41,
-      "commute_station": "亀有",
-      "commute_train_minutes": 34,
-      "commute_transfers": 1,
-      "floor": "7階",
-      "floor_space": "60㎡",
-      "key": "20_2810:000080704",
-      "layout": "2LDK",
-      "rent": "97,300円",
-      "rent_yen": 97300,
-      "room": "8号棟704号室",
-      "room_id": "000080704",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2810_room.html?JKSS=000080704"
-    },
-    {
       "access": "東武伊勢崎線「西新井」駅 徒歩8～13分",
       "building": "栗原",
       "building_id": "20_1600",
