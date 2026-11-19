@@ -20,27 +20,6 @@
       "room": "3号棟107号室",
       "room_id": "000030107",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2770_room.html?JKSS=000030107"
-    },
-    {
-      "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
-      "building": "竹の塚第一アネックス",
-      "building_id": "20_1301",
-      "city": "足立区",
-      "common_fee": "共益費：5,800円",
-      "commute_access_minutes": 23,
-      "commute_minutes": 40,
-      "commute_station": "北千住",
-      "commute_train_minutes": 17,
-      "commute_transfers": 0,
-      "floor": "2階",
-      "floor_space": "36㎡",
-      "key": "20_1301:000340203",
-      "layout": "1DK",
-      "rent": "83,300円",
-      "rent_yen": 83300,
-      "room": "34号棟203号室",
-      "room_id": "000340203",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1301_room.html?JKSS=000340203"
     }
   ],
   "version": 1
