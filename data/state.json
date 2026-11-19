@@ -41,6 +41,27 @@
       "room": "34号棟203号室",
       "room_id": "000340203",
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1301_room.html?JKSS=000340203"
+    },
+    {
+      "access": "東武伊勢崎線「竹ノ塚」駅バス9～15分 徒歩2～8分 / / 東武伊勢崎線「谷塚」駅 徒歩17～24分",
+      "building": "花畑",
+      "building_id": "20_1170",
+      "city": "足立区",
+      "common_fee": "共益費：4,500円",
+      "commute_access_minutes": 23,
+      "commute_minutes": 56,
+      "commute_station": "竹ノ塚",
+      "commute_train_minutes": 33,
+      "commute_transfers": 1,
+      "floor": "5階",
+      "floor_space": "43㎡",
+      "key": "20_1170:000061508",
+      "layout": "3K",
+      "rent": "63,400円",
+      "rent_yen": 63400,
+      "room": "61号棟508号室",
+      "room_id": "000061508",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1170_room.html?JKSS=000061508"
     }
   ],
   "version": 1
