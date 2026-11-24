@@ -22,27 +22,6 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=226040614"
     },
     {
-      "access": "都営新宿線「西大島」駅 徒歩5～10分 / / JR総武線・東武亀戸線「亀戸」駅バス4～6分 徒歩2～6分 / / 都営新宿線「大島」駅 徒歩7～12分",
-      "building": "大島四丁目",
-      "building_id": "20_1780",
-      "city": "江東区",
-      "common_fee": "共益費：3,900円",
-      "commute_access_minutes": 12,
-      "commute_minutes": 35,
-      "commute_station": "亀戸",
-      "commute_train_minutes": 23,
-      "commute_transfers": 1,
-      "floor": "6階",
-      "floor_space": "48㎡",
-      "key": "20_1780:000070613",
-      "layout": "2LDK",
-      "rent": "98,000円",
-      "rent_yen": 98000,
-      "room": "7号棟613号室",
-      "room_id": "000070613",
-      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_1780_room.html?JKSS=000070613"
-    },
-    {
       "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
       "building": "竹の塚第一アネックス",
       "building_id": "20_1301",
