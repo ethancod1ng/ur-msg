@@ -22,6 +22,27 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=226040614"
     },
     {
+      "access": "都営三田線「高島平」駅 徒歩2～11分 / / 都営三田線「新高島平」駅 徒歩4～22分",
+      "building": "高島平",
+      "building_id": "20_2250",
+      "city": "板橋区",
+      "common_fee": "共益費：4,200円",
+      "commute_access_minutes": 11,
+      "commute_minutes": 53,
+      "commute_station": "高島平",
+      "commute_train_minutes": 42,
+      "commute_transfers": 1,
+      "floor": "3階",
+      "floor_space": "46㎡",
+      "key": "20_2250:226060302",
+      "layout": "2DK",
+      "rent": "97,300円",
+      "rent_yen": 97300,
+      "room": "2-26-6号棟302号室",
+      "room_id": "226060302",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=226060302"
+    },
+    {
       "access": "東武伊勢崎線「竹ノ塚」駅 徒歩11～16分 / / 東武伊勢崎線「竹ノ塚」駅バス2～3分 徒歩2～7分 / / JR常磐線「北千住」駅バス16～18分 徒歩1～5分",
       "building": "竹の塚第一アネックス",
       "building_id": "20_1301",
