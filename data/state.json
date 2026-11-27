@@ -85,6 +85,27 @@
       "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2250_room.html?JKSS=226060302"
     },
     {
+      "access": "都営新宿線「篠崎」駅 徒歩17～19分 / / 都営新宿線「篠崎」駅バス5分 徒歩2～3分 / / JR総武線「小岩」駅バス24分 徒歩2～3分",
+      "building": "エステート篠崎（下篠崎町）",
+      "building_id": "20_2770",
+      "city": "江戸川区",
+      "common_fee": "共益費：4,900円",
+      "commute_access_minutes": 8,
+      "commute_minutes": 47,
+      "commute_station": "篠崎",
+      "commute_train_minutes": 39,
+      "commute_transfers": 2,
+      "floor": "1階",
+      "floor_space": "48㎡",
+      "key": "20_2770:000030107",
+      "layout": "2DK",
+      "rent": "83,800円",
+      "rent_yen": 83800,
+      "room": "3号棟107号室",
+      "room_id": "000030107",
+      "url": "https://www.ur-net.go.jp/chintai/kanto/tokyo/20_2770_room.html?JKSS=000030107"
+    },
+    {
       "access": "JR常磐線・東京メトロ千代田線「綾瀬」駅 徒歩14分",
       "building": "メゾン堀切八丁目",
       "building_id": "20_3940",
